@@ -1,0 +1,110 @@
+<template>
+  <div id="app">
+    <header>
+      <div class="wrapper">
+        <h1>{{ station.name }}</h1>
+        <p>{{ station.description }}</p>
+      </div>
+    </header>
+
+    <main>
+      <div v-if="loading">Loading...</div>
+      <div v-else>
+        <div class="album-container">
+          <img :src="nowPlaying.song.art" alt="Album Art" />
+          <button @click="playAudio" v-if="nowPlaying.song.audioUrl">Play</button>
+        </div>
+        <h2>{{ nowPlaying.song.title }}</h2>
+        <p>{{ nowPlaying.song.artist }}</p>
+
+        <!-- Audio element to play the audio -->
+        <audio ref="audioPlayer" :src="nowPlaying.song.audioUrl"></audio>
+      </div>
+    </main>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      loading: true,
+      station: {},
+      nowPlaying: {
+        song: {
+          title: "",
+          artist: "",
+          art: "",
+          audioUrl: "",
+        },
+      },
+    };
+  },
+  mounted() {
+    // Replace the URL below with the actual URL of your API
+    const apiUrl = "https://panel.deepradio.co.uk/api/nowplaying/1";
+
+    // Fetch the JSON data using the browser's fetch API
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        // Update the station and nowPlaying data
+        this.station = data.station;
+        this.nowPlaying = data.now_playing;
+
+        // Set loading to false to display the content
+        this.loading = false;
+      })
+      .catch(error => {
+        console.error("Error fetching data:", error);
+        this.loading = false;
+      });
+  },
+  methods: {
+    playAudio() {
+      // Access the audio element and play it
+      const audioPlayer = this.$refs.audioPlayer;
+      if (audioPlayer) {
+        audioPlayer.play();
+      }
+    },
+  },
+};
+</script>
+
+<style scoped>
+#app {
+  text-align: center;
+  margin-top: 2em;
+}
+
+header {
+  background-color: #333;
+  color: white;
+  padding: 1em;
+}
+
+main {
+  margin: 2em 0;
+}
+
+.album-container {
+  position: relative;
+  display: inline-block;
+}
+
+img {
+  max-width: 200px;
+  max-height: 200px;
+  margin-bottom: 1em;
+}
+
+button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 10px;
+  cursor: pointer;
+}
+</style>
